@@ -29,19 +29,22 @@ const DraggableItem = ({
   item,
   isDragging,
   isOver,
+  isOverDroppable,
 }: {
   item: Item;
   isDragging: boolean;
   isOver: boolean;
+  isOverDroppable: boolean;
 }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: item.id,
   });
 
-  // We can use useDroppable here to make the item droppable
-  const { isOver: isOverDroppable, setNodeRef: setDroppableRef } = useDroppable({
+  const { isOver: isOverDroppableState, setNodeRef: setDroppableRef } = useDroppable({
     id: item.id,
   });
+
+  const isOverItem = isOver || isOverDroppableState;
 
   return (
     <div
@@ -56,14 +59,14 @@ const DraggableItem = ({
         margin: '4px',
         backgroundColor: isDragging
           ? 'lightblue'
-          : isOver || isOverDroppable
+          : isOverItem
           ? 'lightcoral'
           : 'lightgray',
         border: '1px solid gray',
         borderRadius: '4px',
         cursor: 'grab',
         transition: 'background-color 0.3s ease, transform 0.2s ease',
-        transform: isOver || isOverDroppable ? 'scale(1.05)' : 'scale(1)', // Scale up when hovered
+        transform: isOverItem ? 'scale(1.05)' : 'scale(1)', // Scale up when hovered
         position: 'relative',
         zIndex: isDragging ? 10 : 1,
       }}
@@ -76,6 +79,7 @@ const DraggableItem = ({
 const DragDropExample = () => {
   const [items] = React.useState<Item[]>(initialItems);
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [overId, setOverId] = React.useState<string | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -85,6 +89,16 @@ const DragDropExample = () => {
 
   const handleDragEnd = (event: any) => {
     setActiveId(null);
+    setOverId(null); // Reset overlapping ID
+  };
+
+  const handleDragMove = (event: any) => {
+    const { over } = event;
+    if (over && over.id !== activeId) { // Prevent self-hovering
+      setOverId(over.id); // Update overlapping ID only if it's not the same
+    } else {
+      setOverId(null); // Reset if hovering over self
+    }
   };
 
   return (
@@ -92,6 +106,7 @@ const DragDropExample = () => {
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragMove={handleDragMove}
       collisionDetection={closestCenter}
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', maxWidth: '300px' }}>
@@ -100,7 +115,8 @@ const DragDropExample = () => {
             key={item.id}
             item={item}
             isDragging={activeId === item.id}
-            isOver={false} // Not needed anymore
+            isOver={overId === item.id} // Check if this item is being hovered over
+            isOverDroppable={overId === item.id} // Same logic for droppable
           />
         ))}
       </div>
@@ -121,6 +137,12 @@ const DragDropExample = () => {
           </div>
         ) : null}
       </DragOverlay>
+      {/* Display the hovered item ID below the items group */}
+      {overId && (
+        <div style={{ marginTop: '16px', fontSize: '16px' }}>
+          Hovering over: <strong>{overId}</strong>
+        </div>
+      )}
     </DndContext>
   );
 };
