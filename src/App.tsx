@@ -32,21 +32,28 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ id, onDrop, children }) =
         }),
     }));
 
+    // Define styles for the container
+    const containerStyle: React.CSSProperties = {
+        opacity: isDragging ? 0.5 : 1,
+        // margin: '10px',
+        backgroundColor: isOver ? 'lightgreen' : 'lightblue',
+        display: 'inline-block',
+        // border: '1px solid black',
+        position: 'relative', // Ensure this matches with CSSProperties
+        cursor: 'move',
+        // padding: '3px',
+    };
+
+    // Define styles for the children when overlapping
+    const childStyle: React.CSSProperties = {
+        opacity: isOver ? 0.7 : 1, // Change opacity on overlap
+        transform: isOver ? 'scale(1.1)' : 'scale(1)', // Slightly enlarge children
+        transition: 'opacity 0.2s, transform 0.2s', // Smooth transition
+    };
+
     return (
-        <div
-            ref={(node) => drag(drop(node))}
-            style={{
-                opacity: isDragging ? 0.5 : 1,
-                margin: '10px',
-                backgroundColor: isOver ? 'lightgreen' : 'lightblue',
-                display: 'inline-block',
-                border: '1px solid black',
-                position: 'relative',
-                cursor: 'move', // Add cursor style to indicate dragging
-                padding: '5px', // Add padding to make it look nicer
-            }}
-        >
-            {children} {/* Render the children inside the draggable item */}
+        <div ref={(node) => drag(drop(node))} style={containerStyle}>
+            <div style={childStyle}>{children}</div> {/* Apply styles to the children */}
         </div>
     );
 };
