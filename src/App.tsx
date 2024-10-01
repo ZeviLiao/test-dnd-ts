@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -9,10 +9,11 @@ const ItemType = 'ITEM';
 interface DraggableItemProps {
     id: string;
     onDrop: (draggedId: string, targetId: string) => void;
+    children: ReactNode; // Accept children
 }
 
 // DraggableItem component
-const DraggableItem: React.FC<DraggableItemProps> = ({ id, onDrop }) => {
+const DraggableItem: React.FC<DraggableItemProps> = ({ id, onDrop, children }) => {
     const [{ isDragging }, drag] = useDrag(() => ({
         type: ItemType,
         item: { id },
@@ -36,16 +37,16 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ id, onDrop }) => {
             ref={(node) => drag(drop(node))}
             style={{
                 opacity: isDragging ? 0.5 : 1,
-                width: '100px',
-                height: '100px',
                 margin: '10px',
                 backgroundColor: isOver ? 'lightgreen' : 'lightblue',
                 display: 'inline-block',
                 border: '1px solid black',
                 position: 'relative',
+                cursor: 'move', // Add cursor style to indicate dragging
+                padding: '5px', // Add padding to make it look nicer
             }}
         >
-            Item {id}
+            {children} {/* Render the children inside the draggable item */}
         </div>
     );
 };
@@ -62,9 +63,15 @@ const MyComponent: React.FC = () => {
 
     return (
         <div style={{ position: 'relative', padding: '20px' }}>
-            <DraggableItem id="1" onDrop={handleDrop} />
-            <DraggableItem id="2" onDrop={handleDrop} />
-            <DraggableItem id="3" onDrop={handleDrop} />
+            <DraggableItem id="1" onDrop={handleDrop}>
+                <button style={{ padding: '10px 20px' }}>Button 1</button>
+            </DraggableItem>
+            <DraggableItem id="2" onDrop={handleDrop}>
+                <button style={{ padding: '10px 20px' }}>Button 2</button>
+            </DraggableItem>
+            <DraggableItem id="3" onDrop={handleDrop}>
+                <button style={{ padding: '10px 20px' }}>Button 3</button>
+            </DraggableItem>
             {overlapping && (
                 <div
                     style={{
