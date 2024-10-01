@@ -1,12 +1,12 @@
 // App.tsx
 import React from 'react';
-import DraggableItems from './DraggableItems';
+import DragOverlayExample from './DragDropExample';
 
 const App: React.FC = () => {
   return (
-    <div>
-      <h1>Drag and Drop with Reset</h1>
-      <DraggableItems />
+    <div style={{ padding: '20px' }}>
+      <h1>Drag and Drop Overlay Example</h1>
+      <DragOverlayExample />
     </div>
   );
 };
